@@ -1,6 +1,6 @@
 //adapted from Open Processing: https://www.openprocessing.org/sketch/28755#
 
-float _detail = 25;
+float _detail = 45;
 int _ballRadius = 200;
 float rotX = 0;
 float rotY = 0;
@@ -51,11 +51,6 @@ void draw() {
     }
   }
   endShape();
-  //rect(100,100,200,200);
-
-  //translate(0,0);
-  //rotateY(0);
-  //fill(200, 200, 200, 1);
   if (keyPressed == true) {
     if (keyCode == RIGHT) {
       //rect(cpX + (_factor * 2), cpY, _factor * 2, _factor);
