@@ -28,12 +28,12 @@ void setup() {
   colorList[3] = color(255, 127, 0);
   colorList[4] = color(0, 255, 0);
   colorList[5] = color(255, 255, 255);
-  colorThresholds[0] = 0; // red
-  colorThresholds[1] = 0; // blue
-  colorThresholds[2] = 0; // yellow
+  colorThresholds[0] = 150; // red
+  colorThresholds[1] = 186; // blue
+  colorThresholds[2] = 148; // yellow
   colorThresholds[3] = 0; // orange - NOT WORKING WELL
-  colorThresholds[4] = 0; // green
-  colorThresholds[5] = 0; // white
+  colorThresholds[4] = 178; // green
+  colorThresholds[5] = 86; // white
 }
 
 void draw() {

@@ -1,7 +1,12 @@
-// REVENGE OF LEFT SHARK
-//beachball chromakey
+// REVENGE OF LEFT SHARK SERIES
+//beachball chromakey - calebfergie
 
-// From 'the world pixel by pixel' 2018 - Daniel Rozin
+// DIRECTIONS
+// 1. USE NUMBER KEYS 1 - 6 TO HIGHLIGHT A COLOR
+// 2. USE UP AND DOWN ARROW KEYS TO INCREASE OR DECREASE THAT COLOR'S THRESHOLD
+// 3. TAP NUMBER 7 KEY TO CHANGE BACKGROUND TO BLACK
+
+// Adapted from 'the world pixel by pixel' 2018 - Daniel Rozin
 // uses PXP methods in the bottom
 
 import processing.video.*;
