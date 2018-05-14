@@ -6,6 +6,7 @@
 import processing.video.*;
 import ddf.minim.*;
 Capture video;
+Movie tutorialVideo;
 Minim minim; 
 AudioPlayer introSong;
 AudioPlayer song;
@@ -66,9 +67,9 @@ int[][][] kidRightRoutines = {//xy coordinates of various right hand routines
 int[][][] leftRoutines;
 int[][][] rightRoutines;
 
-int phase, section, sectionTimer, leftTimer, leftStep, rightTimer, rightStep, danceTimer; //timers for stepping between sections and phases of routines
+int phase, section, sectionTimer, leftTimer, leftStep, rightTimer, rightStep, danceTimer, tutTimer; //timers for stepping between sections and phases of routines
 
-int m, danceM; // ITS MILLIS BETCH - timing vars
+int m, tutM, danceM; // ITS MILLIS BETCH - timing vars
 
 boolean updateStatus = false; //programming is a series of compromises and band-aid solutions - used to counter millis lag issue when sketch firsts loads
 boolean tallyStatus = false; //programming is a series of compromises and band-aid solutions - used to counter millis lag issue when sketch firsts loads
@@ -90,11 +91,10 @@ int photoOp3 = 90000;
 
 //button variables and objs
 ArrayList<Button> buttons = new ArrayList<Button>();
-Button kidsModeButton = new Button(420, 450, 120, 50, "kidsMode", false, "Adult", "Kids");
+Button kidsModeButton = new Button(420, 450, 120, 50, "kidsMode", true, "Adult", "Kids");
 Button difficultyButton = new Button(660, 450, 120, 50, "difficulty", false, "Normal", "Hard");
 Button tutorialButton = new Button(910, 450, 120, 50, "tutorial", true, "Off", "On");
 //Button finColorButton = new Button(420,500,120,50,"finColor",false,"Red","Blue");
-
 
 //Game scoring variables and objs
 int leftGrade, rightGrade;
@@ -145,6 +145,9 @@ void setup() {
   introImage = loadImage("https://i.imgur.com/WkyQ9nF.jpg");
   introImage.resize(width, height);
 
+  //tutorial movie setup
+  tutorialVideo = new Movie(this, "tutorial-video.mp4");
+
   // Sound setup
   minim = new Minim(this);
   song = minim.loadFile("left-shark-revenge_mixdown.mp3", 1024);
@@ -192,16 +195,19 @@ void keyPressed() {
   } //snap a pic ;)
 
   else if (keyCode == ENTER) {
+        //set the appropriate timers to the current time
+    if (screenSection == 0) {
+    tutTimer = m;} 
+    if (screenSection == 1) {
+    rightTimer = m;
+    leftTimer = m;
+    danceTimer = m;}
     if (screenSection == 3) {
       screenSection =0;
     } else {
       screenSection++;
     }
-    rightTimer = m; //set the timers to the current time
-    leftTimer = m;
-    danceTimer = m;
-    //screenSection = 1;
-  } //"Start game" prompt
+  }
 }
 
 void snapPic() {
@@ -219,12 +225,14 @@ void draw() {
     }
   }
   if (screenSection == 1) {
-  if (tutorialButton.status == true) {   //if tutorial button is on, show it, otherwise skip to next screen section
-    runTutorial();
+    if (tutorialButton.status == true) {   //if tutorial button is on, show it, otherwise skip to next screen section
+      tutorialVideo.play();
+      runTutorial();
+    } else {
+      screenSection = 2;
+    }
   }
-  else {screenSection = 2;}
 
-}
   if (screenSection == 2) {//launch the game- danceM
     introSong.pause();
     danceM = m; //define a new relative millis time
@@ -283,7 +291,7 @@ void runIntro() {
   stroke(gradeColors[3]);
   strokeWeight(10);
   strokeJoin(ROUND);
-  rect(width/2, 400, 850, 700);
+  rect(width/2, 400, 850, 600);
   strokeWeight(0);
   //filter(BLUR, 6);
   fill(gradeColors[3]);
@@ -307,6 +315,50 @@ void runIntro() {
   text("READY TO DANCE LIKE LEFT SHARK?", width/2, height/2+150);
   text("BEGIN BY PRESSING ENTER/RETURN", width/2, height/2 + 200);
   textFont(font1);
+}
+
+void runTutorial() {
+  if (m - tutTimer >= 30000) { //pause the tutorial and move on after 1.5 minutes
+    tutorialVideo.pause();
+    rightTimer = m;
+    leftTimer = m;
+    danceTimer = m;
+    screenSection=2;
+  }
+
+  // load the screen pixels
+  if (video.available()) video.read();
+  image(introImage, 0, 0);   
+  loadPixels();                                                          
+  video.loadPixels();
+  for (int x = 0; x < video.width; x++ ) {
+    realX = width - x; // re-define a "real X" that has an origin of 0,0
+    for (int y = 0; y < video.height; y++ ) {
+      PxPGetPixel(x, y, video.pixels, width);        // get the RGB of the live video (          int loc = x + y * video.width;  color currentColor = video.pixels[loc];
+      float gd = distSq(R, G, B, 0, 255, 0); //hardcoded GREEN or wall color
+      if (gd > sq(greenScreenThreshold)) {
+        PxPSetPixel(realX-1, y, R, G, B, 255, pixels, width); //loads the pixels of the second image or video
+      }
+    }
+  }
+  updatePixels();
+  textAlign(CENTER, CENTER);
+  textFont(font1big);
+  fill(21, 21, 21, 210);
+  stroke(gradeColors[3]);
+  strokeWeight(10);
+  strokeJoin(ROUND);
+  rect(width/2, 400, 850, 600);
+  fill(gradeColors[3]);
+  text("VIDEO TUTORIAL", width/2, height/2 - 300);
+  textFont(font1med);
+  text("USE YOUR FIN GLOVES", width/2, height/2+150);
+  text("TO TOUCH THE GLOWING BALL", width/2, height/2 + 200);
+
+  if (tutorialVideo.available()) {
+    tutorialVideo.read();
+  }
+  image(tutorialVideo, 350, 250);
 }
 
 void runGame() {
@@ -342,9 +394,9 @@ void runGame() {
     song.play(0);
   } //wait half a second before playing the song
 
-  if (danceM - danceTimer >= 87000) { //pause the song and move on after 1.5 minutes
+  if (danceM - danceTimer >= 87000) { //pause the song and move on after ~1.5 minutes
     song.pause();
-    screenSection=2;
+    screenSection=3;
   }
 
   if (danceM >= photoOp1 && Op1 == false) {
@@ -536,10 +588,15 @@ void checkForInteraction() {
 void runGameOver() {
   //background(); need to fill the background with something
   textAlign(CENTER, CENTER);
-  fill(0);
   textFont(font1big);
   liveGame = true;
-  //textSize(64);
+  fill(21, 21, 21, 150);
+  stroke(gradeColors[3]);
+  strokeWeight(10);
+  strokeJoin(ROUND);
+  rect(width/2, 400, 1150, 600);
+  strokeWeight(0);
+  fill(255);
   text("GAME OVER!", width/2, 150);
   textFont(font1med);
   text("Press Return / Enter to try again", width/2, 325);
@@ -673,6 +730,7 @@ void resetGame() {
     rightStep=0;
     danceTimer=0;
     danceM=0;
+    tutM =0;
     perfectCount=0;
     greatCount=0;
     goodCount=0;
@@ -681,6 +739,8 @@ void resetGame() {
     subTotal=0;
     avgScore=0;
     salutation=0;
+    tutTimer=0;
+    tutorialVideo.jump(0);
     tpb = tbb/tempo;
     updateStatus = false;
     tallyStatus = false;
@@ -725,3 +785,8 @@ void PxPSetPixel(int x, int y, int r, int g, int b, int a, int[] pixelArray, int
   color argb = a | r | g | b;        // binary "or" operation adds them all into one int
   pixelArray[x+y*pixelsWidth]= argb;    // finaly we set the int with te colors into the pixels[]
 }
+
+//// Called every time a new frame is available to read
+//void movieEvent(Movie m) {
+//  m.read();
+//}
