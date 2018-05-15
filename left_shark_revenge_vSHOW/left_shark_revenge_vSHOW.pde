@@ -1,3 +1,4 @@
+
 //LEFT SHARK REVENGE - red/blue fin added, button provisioned
 // Made with code from Daniel Shiffman + Danny Rozin, teaching me the future
 // Specifically blobs + PxPGet
@@ -323,7 +324,7 @@ void runIntro() {
 }
 
 void runTutorial() {
-  if (m - tutTimer >= 30000) { //pause the tutorial and move on after 1.5 minutes
+  if (m - tutTimer >= 18000) { //pause the tutorial and move on after 1.5 minutes
     tutorialVideo.pause();
     rightTimer = m;
     leftTimer = m;
@@ -363,7 +364,7 @@ void runTutorial() {
   if (tutorialVideo.available()) {
     tutorialVideo.read();
   }
-  image(tutorialVideo, 350, 250);
+  image(tutorialVideo, 350, 250, 480, 270);
 }
 
 void runGame() {
@@ -619,7 +620,7 @@ void runGameOver() {
   text("Misses:"+missCount, width - testDist +(testDist/4), height/2);
   fill(gradeColors[salutation]);
   text(salutationList[salutation], width/2, 225);
-  text("You had an average score of: "+avgScore, width/2, 275);
+  text("You had an average score of: "+avgScore+" out of 4", width/2, 275);
 }
 
 void triggerAnimation() {
@@ -712,7 +713,7 @@ void tallyScore() {
         missCount++;
       }
     }
-    avgScore = subTotal/ (score.size() + 1); // +1 to prevent div by 0
+    avgScore = subTotal/ (score.size() + 1) + 1; // +1 to prevent div by 0
     salutation = constrain(round(avgScore), 0, gradeWords.length);
   }
   tallyStatus = true;
