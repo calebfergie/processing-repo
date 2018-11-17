@@ -34,7 +34,7 @@ float amp = 1;
 
 void setup() {
   size(800, 800, P3D);
-  file = new SoundFile(this, "shy-ronnie.aif");
+  file = new SoundFile(this, "i-cant-take-it.aiff");
   colorMode(HSB, 100);
   background(0);
   cpX = width - width/10;
@@ -54,23 +54,21 @@ void draw() {
   translate(width/2, height/2);
   rotateX(sin(rotX));
   rotateY(rotY % TWO_PI);
-  //rotateZ(sin(rotZ));
-  if (playButton == 1) {
-    rotX = rotX + 0.005;
-    rotY = rotY + 0.005;
-  };
+  rotateZ(sin(rotZ));
+  //if (playButton == 1) {
+  //  rotX = rotX + 0.005;
+  //  rotY = rotY + 0.005;
+  //};
   stroke(255);
   noFill();
   beginShape();
+  
   float x, y, z, h, s, l;
-  for (int ch=0; ch<numChannels; ch++) {
-    fft[ch].analyze(spectrum);
-  }
-  timeThing = 0;
+  //for (int ch=0; ch<numChannels; ch++) {
+  //  fft[ch].analyze(spectrum);
+  //}
+  //timeThing = 0;
   for (float zi = -_detail * PI / 2; zi < _detail * PI; zi++) {
-    timeThing = timeThing + 1;
-    averagize(_ballRadius *spectrum[abs(int(zi))], timeThing -1);
-    println(timeThing,frameRate);
     for (float r = 0; r < TWO_PI; r += TWO_PI / _detail) {
       x = cos(r);
       y = sin(r);
@@ -82,26 +80,18 @@ void draw() {
       l = map(r, 0, TWO_PI, 75, 100);
       stroke(h, 70, l);
       float heightMultiplier = sqrt(1 - sq(z-.5));
-      curveVertex(x * heightMultiplier * _ballRadius, (y * heightMultiplier*_ballRadius) - (y * heightMultiplier*_ballRadius*averageArray[timeThing-1]), z * _ballRadius - _ballRadius/2);
+      curveVertex(x * heightMultiplier * _ballRadius, (y * heightMultiplier*_ballRadius) - (y * heightMultiplier*_ballRadius)*_ballRadius, z * _ballRadius - _ballRadius/2);
     }
   }
   endShape();
   if (keyPressed == true) {
     if (keyCode == RIGHT) {
-      //rect(cpX + (_factor * 2), cpY, _factor * 2, _factor);
-      //triangle(cpX + (_factor * 2), cpY + _factor, cpX + (_factor * 2), cpY - _factor, cpX + _factor * 4, cpY);
       rotY = rotY + 0.01;
     } else if (keyCode == LEFT) {
-      //rect(cpX - (_factor * 2), cpY, _factor * 2, _factor);
-      //triangle(cpX - (_factor * 2), cpY + _factor, cpX - (_factor * 2), cpY - _factor, cpX - _factor * 4, cpY);
       rotY = rotY - 0.01;
     } else if (keyCode == UP) {
-      //rect(cpX, cpY - (_factor * 2), _factor, _factor*2);
-      //triangle(cpX - _factor, cpY - (_factor *2), cpX + _factor, cpY - (_factor *2), cpX, cpY  - _factor * 4);
       rotX = rotX + 0.01;
     } else if (keyCode == DOWN) {
-      //rect(cpX, cpY + (_factor * 2), _factor, _factor*2);
-      //triangle(cpX - _factor, cpY + (_factor *2), cpX + _factor, cpY + (_factor *2), cpX, cpY  + _factor * 4);
       rotX = rotX - 0.01;
     }
   };
