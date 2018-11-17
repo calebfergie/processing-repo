@@ -1,3 +1,4 @@
+
 //LEFT SHARK REVENGE - red/blue fin added, button provisioned
 // Made with code from Daniel Shiffman + Danny Rozin, teaching me the future
 // Specifically blobs + PxPGet
@@ -77,6 +78,7 @@ boolean liveGame = false; //programming is a series of compromises and band-aid 
 boolean Op1 = false;
 boolean Op2 = false;
 boolean Op3 = false;
+boolean Op4 = false;
 
 // UI variables
 int screenSection, leftTextX, leftTextY, rightTextX, rightTextY, leftAlpha, rightAlpha; //screen section and text-variables
@@ -85,13 +87,14 @@ String[] gradeWords ={"MISS", "BOO", "GOOD", "GREAT", "PERFECT"}; //text content
 boolean devMode = false; //developer view overlay
 
 //photo and filepath variables
-int photoOp1 = 30000;
-int photoOp2 = 60000;
-int photoOp3 = 90000;
+int photoOp1 = 25000;
+int photoOp2 = 40000;
+int photoOp3 = 65000;
+int photoOp4 = 80000;
 
 //button variables and objs
 ArrayList<Button> buttons = new ArrayList<Button>();
-Button kidsModeButton = new Button(420, 450, 120, 50, "kidsMode", true, "Adult", "Kids");
+Button kidsModeButton = new Button(420, 450, 120, 50, "kidsMode", false, "Adult", "Kids");
 Button difficultyButton = new Button(660, 450, 120, 50, "difficulty", false, "Normal", "Hard");
 Button tutorialButton = new Button(910, 450, 120, 50, "tutorial", true, "Off", "On");
 //Button finColorButton = new Button(420,500,120,50,"finColor",false,"Red","Blue");
@@ -191,17 +194,28 @@ void keyPressed() {
     greenScreenThreshold+=3;
   } //increase how easily any pixel is greenscreened
   else if (key == 'p') {
+    
     snapPic();
   } //snap a pic ;)
+  
+  else if (key == 'k'){
+  kidsModeButton.status = !kidsModeButton.status;
+  //toggle kids mode in case button doesnt work
+  }
 
   else if (keyCode == ENTER) {
-        //set the appropriate timers to the current time
+    //set the appropriate timers to the current time
     if (screenSection == 0) {
-    tutTimer = m;} 
+      tutorialVideo.pause();
+      tutorialVideo.jump(0);
+      tutTimer = m;
+    } 
+    
     if (screenSection == 1) {
-    rightTimer = m;
-    leftTimer = m;
-    danceTimer = m;}
+      rightTimer = m;
+      leftTimer = m;
+      danceTimer = m;
+    }
     if (screenSection == 3) {
       screenSection =0;
     } else {
@@ -229,6 +243,9 @@ void draw() {
       tutorialVideo.play();
       runTutorial();
     } else {
+      rightTimer = m;
+      leftTimer = m;
+      danceTimer = m;
       screenSection = 2;
     }
   }
@@ -318,7 +335,7 @@ void runIntro() {
 }
 
 void runTutorial() {
-  if (m - tutTimer >= 30000) { //pause the tutorial and move on after 1.5 minutes
+  if (m - tutTimer >= 18000) { //pause the tutorial and move on after 1.5 minutes
     tutorialVideo.pause();
     rightTimer = m;
     leftTimer = m;
@@ -358,7 +375,7 @@ void runTutorial() {
   if (tutorialVideo.available()) {
     tutorialVideo.read();
   }
-  image(tutorialVideo, 350, 250);
+  image(tutorialVideo, 350, 250, 480, 270);
 }
 
 void runGame() {
@@ -399,19 +416,24 @@ void runGame() {
     screenSection=3;
   }
 
-  if (danceM >= photoOp1 && Op1 == false) {
+  if (danceM - danceTimer >= photoOp1 && Op1 == false) {
     snapPic();
     Op1 = true;
   }
 
-  if (danceM >= photoOp2 && Op2 == false) {
+  if (danceM - danceTimer >= photoOp2 && Op2 == false) {
     snapPic();
     Op2 = true;
   }
 
-  if (danceM >= photoOp3 && Op3 == false) {
+  if (danceM - danceTimer >= photoOp3 && Op3 == false) {
     snapPic();
     Op3 = true;
+  }
+
+  if (danceM - danceTimer >= photoOp4 && Op4 == false) {
+    snapPic();
+    Op4 = true;
   }
 
   // load the screen pixels
@@ -450,7 +472,7 @@ void runGame() {
     for (int y = 0; y < video.height; y++ ) {
       PxPGetPixel(x, y, video.pixels, width);          // get the RGB of the live video (replacing int loc = x + y * video.width;  color currentColor = video.pixels[loc];
       //BLOB STUFF
-      float d = distSq(R, G, B, 255, 0, 0); //hardcoded fin color
+      float d = distSq(R, G, B, 0, 0, 255); //hardcoded fin color
       if (d < threshold*threshold) { 
         boolean found = false;
         for (Blob b : currentBlobs) {
@@ -614,7 +636,7 @@ void runGameOver() {
   text("Misses:"+missCount, width - testDist +(testDist/4), height/2);
   fill(gradeColors[salutation]);
   text(salutationList[salutation], width/2, 225);
-  text("You had an average score of: "+avgScore, width/2, 275);
+  text("You had an average score of: "+avgScore+" out of 4", width/2, 275);
 }
 
 void triggerAnimation() {
@@ -707,7 +729,7 @@ void tallyScore() {
         missCount++;
       }
     }
-    avgScore = subTotal/ (score.size() + 1); // +1 to prevent div by 0
+    avgScore = subTotal/ (score.size() + 1) + 1; // +1 to prevent div by 0
     salutation = constrain(round(avgScore), 0, gradeWords.length);
   }
   tallyStatus = true;
@@ -716,6 +738,9 @@ void tallyScore() {
 void resetGame() {
   if (liveGame == true) {
     println("resetting game");
+    //reset tutorial video
+    tutorialVideo.pause();
+    tutorialVideo.jump(0);
     // hide current targets 
     leftTarget.hide(); //hide it until the next beat and location
     rightTarget.hide(); //hide it until the next beat and location
@@ -740,13 +765,13 @@ void resetGame() {
     avgScore=0;
     salutation=0;
     tutTimer=0;
-    tutorialVideo.jump(0);
     tpb = tbb/tempo;
     updateStatus = false;
     tallyStatus = false;
     Op1 = false;
     Op2 = false;
     Op3 = false;
+    Op4 = false;
     for (int i = score.size() - 1; i >= 0; i--) { //loop backwards as per https://processing.org/reference/ArrayList.html
       score.remove(i);
     }
